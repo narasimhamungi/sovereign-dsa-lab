@@ -6,5 +6,5 @@
 - **Exogenous inputs.** Growth, inflation, interest rates and the primary balance do not respond to each other or to
   debt (no fiscal reaction function) except through historical co-movement in the fan chart.
 - **Shocks** are drawn independently across years (no persistence) and around historical means.
-- **Not validated against a published table yet** (docs/validation.md).
+- **Validated against one published table only** (Costa Rica, IMF CR 24/359), with the exchange-rate channel taken from the report rather than rebuilt (docs/validation.md).
 - Not the IMF's framework: it has more modules (gross financing needs, debt-at-risk, market-access indicators).

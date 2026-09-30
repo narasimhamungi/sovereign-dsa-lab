@@ -21,10 +21,23 @@ the shocks. Built to be reconciled line by line against a published debt-decompo
       historical covariance), with the independent-draw version alongside for comparison
 - [x] Reconciliation tool for a transcribed published table: transcription check, automatic dynamics rebuilt from the
       memo items, and the path with the report's residual carried rather than fitted. Tested on synthetic tables
-- [x] 20 pytest tests and CI
-- [ ] **Validation against a real published table: not done.** Needs one staff-report table transcribed into
-      `benchmarks/` ([`docs/validation.md`](docs/validation.md)). Until then this repo shows a working engine, not
-      a validated one
+- [x] 21 pytest tests and CI
+- [x] Validation against a published IMF table (Costa Rica, IMF Country Report 24/359, SRDSF baseline): from the
+      report's own inputs the model stays within 0.28 pp of GDP of the IMF's debt path in every year to 2033, with
+      nothing fitted. One of the three checks fails as designed and is reported, not re-specified; see
+      [`docs/validation.md`](docs/validation.md)
+
+## Validation result (Costa Rica, IMF CR 24/359)
+
+| Check | Result |
+|---|---|
+| Transcription (contributions add up) | Pass every year |
+| Automatic dynamics rebuilt from the report's memo items | Pass every year (±0.05 pp to 2029; -0.24 pp by 2033) |
+| Report's residual explains the remaining path gap | Fail: the model already matches the path without it |
+| Model debt path vs the IMF's, nothing fitted | Within 0.28 pp of GDP, 2024-2033 |
+
+The gap in the extended-projection years comes from the report's real-interest line, which is higher than its
+published effective rate implies; the table alone does not say why. Details: [`docs/validation.md`](docs/validation.md).
 
 ## What the example shows (and does not)
 
@@ -41,5 +54,5 @@ Full output: [`outputs/summary.md`](outputs/summary.md).
 pip install -e ".[test]"
 python -m pytest
 sovereign-dsa-lab run --config examples/country_h_hypothetical.json --out outputs
-sovereign-dsa-lab reconcile --benchmark benchmarks/<country>_<report>.csv --out outputs/reconciliation.md
+sovereign-dsa-lab reconcile --benchmark benchmarks/costa_rica_pfa_2024.csv --out outputs/reconciliation_costa_rica_pfa_2024.md
 ```

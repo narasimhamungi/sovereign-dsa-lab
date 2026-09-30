@@ -55,10 +55,13 @@ def reconcile(rows: list[dict], tol_row: float = 0.25, tol_auto: float = 0.3, to
             auto += (r.get("exchange_rate") or 0.0) / 100
             fx_note = "taken from report" if r.get("exchange_rate") else "none"
         auto_gap = auto * 100 - r["automatic_dynamics"]
+        dom = None
+        if r.get("real_interest") is not None and r.get("real_growth") is not None:
+            dom = prev * (rr - pi * (1 + g) - g) / den * 100 - (r["real_interest"] + r["real_growth"])
         row_ok = t_sum <= tol_row and t_chg <= tol_row and abs(auto_gap) <= tol_auto
         report.append({"year": r["year"], "transcription_sum_gap": t_sum, "transcription_change_gap": t_chg,
                        "auto_reported": r["automatic_dynamics"], "auto_model": auto * 100, "auto_gap": auto_gap,
-                       "fx_term": fx_note, "row_ok": row_ok})
+                       "fx_term": fx_note, "domestic_gap": dom, "row_ok": row_ok})
         ok &= row_ok
         prev_debt = r["debt"]
     # 3. path without the report's residual, same exchange-rate treatment as check 2
@@ -81,17 +84,23 @@ def reconcile(rows: list[dict], tol_row: float = 0.25, tol_auto: float = 0.3, to
                      "gap": r["debt"] - m, "cumulative_reported_residual": cum,
                      "gap_minus_residual": r["debt"] - m - cum})
     path_ok = all(abs(x["gap_minus_residual"]) <= tol_path for x in gaps)
-    return {"passed": ok and path_ok, "rows": report, "path": gaps, "tolerances_pp": (tol_row, tol_auto, tol_path)}
+    return {"passed": ok and path_ok, "rows_ok": ok, "path_ok": path_ok, "rows": report, "path": gaps,
+            "max_abs_path_gap": max(abs(x["gap"]) for x in gaps), "tolerances_pp": (tol_row, tol_auto, tol_path)}
 
 
 def report_text(res: dict, name: str) -> str:
     lines = [f"# Reconciliation to {name}: {'PASS' if res['passed'] else 'FAIL'}", "",
              "Percentage points of GDP. Tolerances (row identity, automatic dynamics, path): "
              + ", ".join(f"{t:g}" for t in res["tolerances_pp"]), "",
-             "| Year | Transcription gap | Auto dynamics: report | model | gap | FX term |", "|---|---|---|---|---|---|"]
+             f"Checks: rows (transcription and automatic dynamics) {'PASS' if res['rows_ok'] else 'FAIL'}; "
+             f"path gap equals cumulative reported residual {'PASS' if res['path_ok'] else 'FAIL'}. "
+             f"Largest gap between the model path (no residual) and the reported path: {res['max_abs_path_gap']:.2f} pp.", "",
+             "| Year | Transcription gap | Auto dynamics: report | model | gap | Real interest + growth gap | FX term |",
+             "|---|---|---|---|---|---|---|"]
     for r in res["rows"]:
+        dom = "n/a" if r["domestic_gap"] is None else f"{r['domestic_gap']:+.2f}"
         lines.append(f"| {r['year']} | {max(r['transcription_sum_gap'], r['transcription_change_gap']):.2f} | "
-                     f"{r['auto_reported']:.2f} | {r['auto_model']:.2f} | {r['auto_gap']:+.2f} | {r['fx_term']} |")
+                     f"{r['auto_reported']:.2f} | {r['auto_model']:.2f} | {r['auto_gap']:+.2f} | {dom} | {r['fx_term']} |")
     lines += ["", "| Year | Debt: report | model without residual | gap | cumulative reported residual | difference |",
               "|---|---|---|---|---|---|"]
     for g in res["path"]:

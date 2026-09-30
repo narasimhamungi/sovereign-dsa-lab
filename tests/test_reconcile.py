@@ -79,3 +79,14 @@ def test_template_parses_headers():
     from conftest import ROOT
     head = (ROOT / "benchmarks" / "TEMPLATE.csv").read_text(encoding="utf-8").splitlines()[0].split(",")
     assert set(rc.REQUIRED) <= set(head)
+
+
+def test_costa_rica_benchmark_results_are_as_documented():
+    """Locks the findings written up in docs/validation.md (IMF CR 24/359, Annex II Table 4)."""
+    from conftest import ROOT
+    res = rc.reconcile(rc.load(ROOT / "benchmarks" / "costa_rica_pfa_2024.csv"))
+    assert res["rows_ok"]                                   # transcription and automatic dynamics pass every year
+    assert res["max_abs_path_gap"] < 0.30                   # model path within 0.3 pp of the reported path, no residual
+    medium = [r for r in res["rows"] if r["year"] <= 2029]  # medium-term years: domestic terms match to rounding
+    assert all(abs(r["domestic_gap"]) <= 0.07 for r in medium)
+    assert not res["path_ok"]                               # the report's residual does not carry over (see validation.md)

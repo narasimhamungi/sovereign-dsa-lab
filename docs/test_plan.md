@@ -8,4 +8,6 @@
 | Fan | Collapses to the baseline with no shocks; percentiles ordered; reproducible by seed; the normal method reproduces the historical covariance; joint draws widen the fan on co-moving history (bootstrap and normal) |
 | Reconciliation | Passes an engine-generated table rounded to 0.1, with and without a residual and with the exchange-rate line taken from the table; fails on a transcription typo and on a wrong memo item |
 
-Results (30 Sep 2026): 20 passed. Not yet done: reconciliation to a real published table.
+| Published benchmark | The Costa Rica (IMF CR 24/359) results documented in docs/validation.md stay as documented |
+
+Results (30 Sep 2026): 21 passed on Python 3.10 to 3.14. Reconciliation to IMF CR 24/359: see docs/validation.md.
