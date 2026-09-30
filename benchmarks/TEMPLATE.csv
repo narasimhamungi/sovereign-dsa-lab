@@ -1,0 +1,5 @@
+year,debt,change,primary_deficit,automatic_dynamics,exchange_rate,other_flows,residual,r,g,pi,alpha,eps,source
+# Transcribe from the staff report's public-debt decomposition table. Percent. First row = last actual year (debt only).
+# primary_deficit: deficit positive. r: effective nominal interest rate. g: real GDP growth. pi: GDP deflator growth.
+# exchange_rate: the contribution line, if the report shows one. alpha and eps: only if the report gives them.
+# source: report title, date and page, on the first row.
